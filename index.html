@@ -1,0 +1,70 @@
+<html>
+<head>
+	<title>Socket.io test</title>
+</head>
+<body>
+
+<form id="setNicknameForm" style="display:none;" onsubmit="setNickname();return false;">
+	<input name="nickname" type="text"><br />
+	<button>Set nickname</button>
+</form>
+
+<form id="chatForm" style="display:none;" onsubmit="sendChat();return false;">
+	<input name="text" type="text"><br />
+	<button>Send</button>
+</form>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io.connect('http://localhost');
+  // When the connection is ready, show the setNickname form
+  socket.on('ready', function () {
+    console.log("server ready");
+    var nicknameForm = document.getElementById("setNicknameForm");
+    if(nicknameForm) {
+    	nicknameForm.style.display = "block";
+	}
+  });
+
+  // On receiving new messages
+  socket.on('message', function (data) {
+    console.log(data);
+    // Add it to the DOM
+    addElement(data);
+  });
+
+ // Set the nickname on the server
+ function setNickname(){
+	socket.emit("setNickname", document.forms[0].nickname.value);
+	// When it has been set, the server will tell us,
+	// Then hide the nickname form and show the chat box.
+	socket.on("nicknameSet", function(){
+		var form = document.getElementById("setNicknameForm");
+		form.parentNode.removeChild(form);
+		// Show the chat dialog box
+		document.getElementById("chatForm").style.display = "block";
+	});
+ }
+
+  // Send a new message to the server
+  function sendChat(){
+  	socket.emit("msg", document.forms[0].text.value);
+  	// Reset value
+  	document.forms[0].text.value = "";
+  }
+
+ // Add a new element to the DOM
+ function addElement (content) {
+  // create a new div element
+  // and give it some content
+  var newDiv = document.createElement("div");
+  var newContent = document.createTextNode(content);
+
+  newDiv.appendChild(newContent); //add the text node to the newly created div.
+
+  // add the newly created element and its content into the DOM
+  document.body.appendChild(newDiv);
+ }
+</script>
+</body>
+</html>
