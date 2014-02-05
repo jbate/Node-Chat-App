@@ -1,7 +1,7 @@
 var server = require('http').createServer(handler)
   , fs = require('fs')
   , io = require('socket.io').listen(server);
-
+  
 server.listen(8080);
 
 function handler (req, res) {
@@ -23,15 +23,7 @@ io.set('log level', 1);
 io.sockets.on('connection', function (socket) {
   // Tell the client we're ready
   socket.emit("ready");
-
-  // Upon receiving new messages
-  socket.on('msg', function (data) {
-    // Broadcast to every client (except this one)
-    socket.broadcast.emit('message', "He just said " + data);
-    // Emit back to client
-    socket.emit('message', "I just said " + data);
-  });
-
+  
   // Upon setting a nickname
   socket.on('setNickname', function(name){
      // Set the nickname
@@ -42,7 +34,21 @@ io.sockets.on('connection', function (socket) {
       socket.emit("nicknameSet");
     });
   });
+
+  // Upon receiving new messages
+  socket.on('msg', function (data) {
+    var nickname = "";
+    socket.get('nickname', function(err, name){
+        nickname = name;
+    });
+    // Broadcast to every client (except this one)
+    socket.broadcast.emit('message', nickname + " just said '" + data + "'");
+    // Emit back to client
+    socket.emit('message', "I just said '" + data + "'");
+  });
+
  
+ // Upon disconnecting
   socket.on('disconnect', function() {
     socket.emit("message", "disconnected");
   });
