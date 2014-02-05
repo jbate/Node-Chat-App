@@ -1,70 +1,92 @@
 <html>
-<head>
-	<title>Socket.io test</title>
-</head>
-<body>
+  <head>
+  	<title>Socket.io chat form</title>
+  </head>
+  <body>
 
-<form id="setNicknameForm" style="display:none;" onsubmit="setNickname();return false;">
-	<input name="nickname" type="text"><br />
-	<button>Set nickname</button>
-</form>
+    <form id="setNicknameForm" style="display:none;">
+    	<input name="nickname" type="text"><br />
+    	<button>Set nickname</button>
+    </form>
 
-<form id="chatForm" style="display:none;" onsubmit="sendChat();return false;">
-	<input name="text" type="text"><br />
-	<button>Send</button>
-</form>
+    <form id="chatForm" style="display:none;">
+    	<input name="text" type="text"><br />
+    	<button>Send</button>
+    </form>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  var socket = io.connect('http://localhost');
-  // When the connection is ready, show the setNickname form
-  socket.on('ready', function () {
-    console.log("server ready");
-    var nicknameForm = document.getElementById("setNicknameForm");
-    if(nicknameForm) {
-    	nicknameForm.style.display = "block";
-	}
-  });
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Bind event listeners
+        var nicknameForm = document.getElementById("setNicknameForm");
+        if (nicknameForm.addEventListener) {
+            nicknameForm.addEventListener('submit', setNickname, false); 
+        } else if (nicknameForm.attachEvent)  {
+            nicknameForm.attachEvent('onsubmit', setNickname);
+        }
 
-  // On receiving new messages
-  socket.on('message', function (data) {
-    console.log(data);
-    // Add it to the DOM
-    addElement(data);
-  });
+        var chatForm = document.getElementById("chatForm");
+        if (chatForm.addEventListener) {
+            chatForm.addEventListener('submit', sendChat, false);  
+        } else if (chatForm.attachEvent)  {
+            chatForm.attachEvent('onsubmit', sendChat);
+        }
 
- // Set the nickname on the server
- function setNickname(){
-	socket.emit("setNickname", document.forms[0].nickname.value);
-	// When it has been set, the server will tell us,
-	// Then hide the nickname form and show the chat box.
-	socket.on("nicknameSet", function(){
-		var form = document.getElementById("setNicknameForm");
-		form.parentNode.removeChild(form);
-		// Show the chat dialog box
-		document.getElementById("chatForm").style.display = "block";
-	});
- }
+        // Open a new connection with the server
+        var socket = io.connect('http://localhost');
+        // When the connection is ready, show the setNickname form
+        socket.on('ready', function () {
+            console.log("server ready");
+            if(nicknameForm) {
+          	   nicknameForm.style.display = "block";
+      	    }
+        });
 
-  // Send a new message to the server
-  function sendChat(){
-  	socket.emit("msg", document.forms[0].text.value);
-  	// Reset value
-  	document.forms[0].text.value = "";
-  }
+        // On receiving new messages
+        socket.on('message', function (name, message) {
+            console.log(name + ": " + message);
+            // Add it to the DOM
+            addMessageToPage("<strong>" + name + "</strong>: " + message);
+        });
 
- // Add a new element to the DOM
- function addElement (content) {
-  // create a new div element
-  // and give it some content
-  var newDiv = document.createElement("div");
-  var newContent = document.createTextNode(content);
+        // On a new visitor joining
+        socket.on('newVisitor', function (name) {
+            // Add it to the DOM
+            addMessageToPage("<em>" + name + " has just joined</em>");
+        });
 
-  newDiv.appendChild(newContent); //add the text node to the newly created div.
+       // Set the nickname on the server
+       function setNickname(event){
+        	socket.emit("setNickname", document.forms[0].nickname.value);
 
-  // add the newly created element and its content into the DOM
-  document.body.appendChild(newDiv);
- }
-</script>
-</body>
+        	// When it has been set, the server will tell us,
+        	// Then hide the nickname form and show the chat box.
+        	socket.on("nicknameSet", function(){
+          		nicknameForm.parentNode.removeChild(nicknameForm);
+
+          		// Show the chat dialog box
+          		document.getElementById("chatForm").style.display = "block";
+        	});
+          event.preventDefault();
+       }
+
+       // Send a new message to the server
+       function sendChat(event){
+        	socket.emit("msg", document.forms[0].text.value);
+        	// Reset value
+        	document.forms[0].text.value = "";
+          event.preventDefault();
+       }
+
+       // Add a new element to the DOM
+       function addMessageToPage (content) {
+          // create a new div element
+          // and give it some content
+          var newDiv = document.createElement('div');
+          newDiv.innerHTML = content;
+
+          // add the newly created element and its content into the DOM
+          document.body.appendChild(newDiv);
+       }
+    </script>
+  </body>
 </html>
