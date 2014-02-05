@@ -19,32 +19,34 @@ function handler (req, res) {
 
 // Reduce the level of logging
 io.set('log level', 1); 
+
 // Upon a new connection
 io.sockets.on('connection', function (socket) {
   // Tell the client we're ready
   socket.emit("ready");
   
-  // Upon setting a nickname
+  // Upon the client setting a nickname
   socket.on('setNickname', function(name){
      // Set the nickname
      socket.set('nickname', name, function () {
       // Broadcast it to all clients (except this one)
-      socket.broadcast.emit('message', name + " has just joined.");
+      socket.broadcast.emit('newVisitor', name);
       // Inform the client we've set the nickname
       socket.emit("nicknameSet");
     });
   });
 
   // Upon receiving new messages
-  socket.on('msg', function (data) {
+  socket.on('msg', function (message) {
     var nickname = "";
+    // Retrieve the nickname
     socket.get('nickname', function(err, name){
         nickname = name;
     });
     // Broadcast to every client (except this one)
-    socket.broadcast.emit('message', nickname + " just said '" + data + "'");
+    socket.broadcast.emit('message', nickname, message);
     // Emit back to client
-    socket.emit('message', "I just said '" + data + "'");
+    socket.emit('message', "You", message);
   });
 
  
