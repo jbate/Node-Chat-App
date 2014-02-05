@@ -10,7 +10,7 @@
     </form>
 
     <form id="chatForm" style="display:none;">
-    	<input name="text" type="text"><br />
+    	<input name="text" type="text" size="30"><br />
     	<button>Send</button>
     </form>
 
@@ -44,8 +44,13 @@
         // On receiving new messages
         socket.on('message', function (name, message) {
             console.log(name + ": " + message);
+            // Highlight the user's name
+            var highlight = "#3c763d;";
+            if(name === "You"){
+                highlight = "#999;";
+            }
             // Add it to the DOM
-            addMessageToPage("<strong>" + name + "</strong>: " + message);
+            addMessageToPage("<strong style='color:" + highlight + "'>" + name + "</strong>: " + message);
         });
 
         // On a new visitor joining
@@ -56,7 +61,8 @@
 
        // Set the nickname on the server
        function setNickname(event){
-        	socket.emit("setNickname", document.forms[0].nickname.value);
+        	var nickname = document.forms[0].nickname.value;
+          socket.emit("setNickname", nickname);
 
         	// When it has been set, the server will tell us,
         	// Then hide the nickname form and show the chat box.
