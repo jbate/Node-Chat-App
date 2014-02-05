@@ -8,5 +8,5 @@ Instructions
 After cloning repo:
 
 1. `npm install`
-2. `node app.js`
+2. `node node-server.js`
 3. Open one or more browsers and start chatting
