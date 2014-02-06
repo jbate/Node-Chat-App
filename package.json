@@ -10,6 +10,9 @@
     "type": "git",
     "url": "https://github.com/jbate/Node-Chat-App.git"
   },
+  "dependencies": {
+    "socket.io": "~0.9.16"
+  },
   "devDependencies": {
     "socket.io": "~0.9.16"
   }
