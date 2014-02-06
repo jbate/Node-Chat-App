@@ -2,6 +2,14 @@
   "name": "Node-Chat-App",
   "author": "James Bate",
   "version": "0.0.1",
+  "main": "web.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbate/Node-Chat-App.git"
+  },
   "devDependencies": {
     "socket.io": "~0.9.16"
   }
