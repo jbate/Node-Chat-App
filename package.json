@@ -1,5 +1,6 @@
 {
   "name": "Node-Chat-App",
+  "author": "James Bate",
   "version": "0.0.1",
   "devDependencies": {
     "socket.io": "~0.9.16"
