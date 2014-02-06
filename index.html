@@ -32,7 +32,8 @@
         }
 
         // Open a new connection with the server
-        var socket = io.connect('http://localhost');
+        //var socket = io.connect('http://localhost');
+        var socket = io.connect();
         // When the connection is ready, show the setNickname form
         socket.on('ready', function () {
             console.log("server ready");
