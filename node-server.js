@@ -4,17 +4,27 @@ var server = require('http').createServer(handler)
   
 server.listen(process.env.PORT || 8080);
 
+// Handle HTTP requests
 function handler (req, res) {
-  fs.readFile(__dirname + '/index.html',
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index.html');
-    }
-
-    res.writeHead(200);
-    res.end(data);
-  });
+  // As we're not using the Express framework, do this manually...
+  if(req.url.indexOf('.js') != -1){ 
+      fs.readFile(__dirname + '/client.js', function (err, data) {
+          if (err) console.log(err);
+          res.writeHead(200, {'Content-Type': 'text/javascript'});
+          res.write(data);
+          res.end();
+      });
+    } else {
+      fs.readFile(__dirname + '/index.html',
+      function (err, data) {
+        if (err) {
+          res.writeHead(500);
+          return res.end('Error loading index.html');
+        }
+        res.writeHead(200);
+        res.end(data);
+      });
+  }
 }
 
 // Reduce the level of logging
