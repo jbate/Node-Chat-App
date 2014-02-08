@@ -24,9 +24,11 @@
         var chatForm = document.getElementById("chatForm");
         addEventListener(chatForm, 'submit', sendChat);
 
+        
         // Open a new connection with the server
         var socket = io.connect();
         var joined = false;
+        var nickname = "";
 
         // When the connection is ready, show the setNickname form
         socket.on('ready', function () {
@@ -41,6 +43,9 @@
             if(joined){
                 // Add it to the DOM
                 addMessageToPage(formatMessage(name, message));
+
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(typingTimeoutFunction, 0);
             }
         });
 
@@ -60,10 +65,32 @@
             }
           }
         });
+      
+      // Someone else is typing something... 
+       socket.on("isTyping", function(name, isTyping) {
+          if (isTyping) {
+              // If the "is typing" message doesn't exist
+              if(!document.getElementById(name + "-typing")){
+                  // Create the new message
+                  var span = document.createElement('span');
+                  span.innerHTML = name + " is typing... ";
+                  span.setAttribute("id", name + "-typing");
+                  document.body.appendChild(span);
+              }
+              typingTimeout = setTimeout(typingTimeoutFunction, 2000);
+          } else {
+              // remove typing notification
+              var span = document.getElementById(name + "-typing");
+              if (span) {
+                  span.parentNode.removeChild(span);
+              }
+          }
+       });
+
 
        // Set the nickname on the server
        function setNickname(event){
-        	var nickname = document.forms[0].nickname.value;
+        	nickname = document.forms[0].nickname.value;
           // Join the chat room and provide our name
           socket.emit("joinChat", nickname);
 
@@ -99,6 +126,29 @@
             return "<strong style='color:" + highlight + "'>" + name + "</strong>: " + message;
        }
 
+       //"is typing" message
+       var typing = false,
+           typingTimeout = undefined;
+
+       function typingTimeoutFunction() {
+          typing = false;
+          socket.emit("typing", nickname, false);
+       }
+       
+       // Check if we are typing a new message and tell everyone
+       addEventListener(chatForm.getElementsByTagName("input")[0], 'keypress', function(event){
+          if (event.which !== 13) {
+              if (typing === false) {
+                  typing = true;
+                  // Tell the server we're typing
+                  socket.emit("typing", nickname, typing);
+              } else {
+                  clearTimeout(typingTimeout);
+                  typingTimeout = setTimeout(typingTimeoutFunction, 2000);
+              }
+          }
+       });
+
        // Add a new element to the DOM
        function addMessageToPage (content) {
           // create a new div element
@@ -109,6 +159,15 @@
           // add the newly created element and its content into the DOM
           document.body.appendChild(newDiv);
        }
+
+       // Create an event listener and handle IE
+       function addEventListener(element, event, callback){
+            if (element.addEventListener) {
+                element.addEventListener(event, callback, false);  
+            } else if (element.attachEvent)  {
+                element.attachEvent('on' + event, callback);
+            }
+        }
     </script>
   </body>
 </html>

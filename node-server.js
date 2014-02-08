@@ -60,8 +60,14 @@ io.sockets.on('connection', function (socket) {
     socket.broadcast.emit('message', nickname, message);
     // Emit back to client
     socket.emit('message', "You", message);
+
+    socket.broadcast.emit("isTyping", nickname, false);
   });
 
+  // Receive event that someone is typing and broadcast it back
+  socket.on("typing", function(name, isTyping) {
+      socket.broadcast.emit("isTyping", name, isTyping);
+  });
  
  // Upon disconnecting
   socket.on('disconnect', function() {
