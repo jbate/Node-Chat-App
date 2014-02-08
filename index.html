@@ -19,18 +19,10 @@
     <script>
         // Bind event listeners
         var nicknameForm = document.getElementById("setNicknameForm");
-        if (nicknameForm.addEventListener) {
-            nicknameForm.addEventListener('submit', setNickname, false); 
-        } else if (nicknameForm.attachEvent)  {
-            nicknameForm.attachEvent('onsubmit', setNickname);
-        }
-
+        addEventListener(nicknameForm, 'submit', setNickname);
+        
         var chatForm = document.getElementById("chatForm");
-        if (chatForm.addEventListener) {
-            chatForm.addEventListener('submit', sendChat, false);  
-        } else if (chatForm.attachEvent)  {
-            chatForm.attachEvent('onsubmit', sendChat);
-        }
+        addEventListener(chatForm, 'submit', sendChat);
 
         // Open a new connection with the server
         var socket = io.connect();
