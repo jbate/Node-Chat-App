@@ -33,8 +33,9 @@
         }
 
         // Open a new connection with the server
-        //var socket = io.connect('http://localhost');
         var socket = io.connect();
+        var joined = false;
+
         // When the connection is ready, show the setNickname form
         socket.on('ready', function () {
             console.log("server ready");
@@ -45,14 +46,10 @@
 
         // On receiving new messages
         socket.on('message', function (name, message) {
-            console.log(name + ": " + message);
-            // Highlight the user's name
-            var highlight = "#3c763d;";
-            if(name === "You"){
-                highlight = "#999;";
+            if(joined){
+                // Add it to the DOM
+                addMessageToPage(formatMessage(name, message));
             }
-            // Add it to the DOM
-            addMessageToPage("<strong style='color:" + highlight + "'>" + name + "</strong>: " + message);
         });
 
         // On a new visitor joining
@@ -61,19 +58,35 @@
             addMessageToPage("<em>" + name + " has just joined</em>");
         });
 
+       // Listen for any chat history the user has missed
+       socket.on("history", function(chatHistory){
+          if(chatHistory.length > 0){
+            addMessageToPage("&nbsp;&nbsp;<strong>Here's what you missed:</strong>");
+            for(var i = 0; i < chatHistory.length; i++){
+                // Add messages to the DOM
+                addMessageToPage("&nbsp;&nbsp;" + formatMessage(chatHistory[i].nickname, chatHistory[i].message));
+            }
+          }
+        });
+
        // Set the nickname on the server
        function setNickname(event){
         	var nickname = document.forms[0].nickname.value;
-          socket.emit("setNickname", nickname);
+          // Join the chat room and provide our name
+          socket.emit("joinChat", nickname);
 
-        	// When it has been set, the server will tell us,
+        	// When it has been set and we've joined, the server will tell us,
         	// Then hide the nickname form and show the chat box.
-        	socket.on("nicknameSet", function(){
+        	socket.on("joined", function(){
+              joined = true;
           		nicknameForm.parentNode.removeChild(nicknameForm);
 
           		// Show the chat dialog box
           		document.getElementById("chatForm").style.display = "block";
+              // Add it to the DOM
+              addMessageToPage("<em>You have now joined the chat</em>");
         	});
+
           event.preventDefault();
        }
 
@@ -83,6 +96,15 @@
         	// Reset value
         	document.forms[0].text.value = "";
           event.preventDefault();
+       }
+
+       function formatMessage(name, message){
+            // Highlight the user's name
+            var highlight = "#3c763d;";
+            if(name === "You"){
+                highlight = "#999;";
+            }
+            return "<strong style='color:" + highlight + "'>" + name + "</strong>: " + message;
        }
 
        // Add a new element to the DOM

@@ -20,19 +20,25 @@ function handler (req, res) {
 // Reduce the level of logging
 io.set('log level', 1); 
 
+var chatHistory = [];
+
 // Upon a new connection
 io.sockets.on('connection', function (socket) {
   // Tell the client we're ready
   socket.emit("ready");
   
-  // Upon the client setting a nickname
-  socket.on('setNickname', function(name){
-     // Set the nickname
-     socket.set('nickname', name, function () {
-      // Broadcast it to all clients (except this one)
-      socket.broadcast.emit('newVisitor', name);
-      // Inform the client we've set the nickname
-      socket.emit("nicknameSet");
+  // Upon the client setting a nickname (joining chat room)
+  socket.on('joinChat', function(name){
+      // Set the nickname
+      socket.set('nickname', name, function () {
+        // Broadcast it to all clients (except this one)
+        socket.broadcast.emit('newVisitor', name);
+
+        // Inform the client we've set the nickname and they've joined
+        socket.emit("joined");
+        
+        // Send the client the chat history
+        socket.emit("history", chatHistory);
     });
   });
 
@@ -43,6 +49,13 @@ io.sockets.on('connection', function (socket) {
     socket.get('nickname', function(err, name){
         nickname = name;
     });
+
+    // Add new messages to chat history
+    if (chatHistory.length >= 10) {
+      chatHistory.splice(0,1);
+    } 
+    chatHistory.push({"nickname": nickname, "message": message});
+
     // Broadcast to every client (except this one)
     socket.broadcast.emit('message', nickname, message);
     // Emit back to client
