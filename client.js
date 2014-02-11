@@ -93,10 +93,13 @@ function setNickname(event){
 
 // Send a new message to the server
 function sendChat(event){
-	socket.emit("msg", document.forms[0].text.value);
-	// Reset value
-	document.forms[0].text.value = "";
   event.preventDefault();
+	var message = document.forms[0].text.value;
+  if(message){
+    socket.emit("msg", document.forms[0].text.value);
+  	// Reset value
+  	document.forms[0].text.value = "";
+  }
 }
 
 function formatMessage(name, message){
