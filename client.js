@@ -72,21 +72,22 @@ socket.on("isTyping", function(name, isTyping) {
 // Set the nickname on the server
 function setNickname(event){
 	nickname = document.forms[0].nickname.value;
-  // Join the chat room and provide our name
-  socket.emit("joinChat", nickname);
+  if(nickname){
+      // Join the chat room and provide our name
+      socket.emit("joinChat", nickname);
 
-	// When it has been set and we've joined, the server will tell us,
-	// Then hide the nickname form and show the chat box.
-	socket.on("joined", function(){
-      joined = true;
-  		nicknameForm.parentNode.removeChild(nicknameForm);
+    	// When it has been set and we've joined, the server will tell us,
+    	// Then hide the nickname form and show the chat box.
+    	socket.on("joined", function(){
+          joined = true;
+      		nicknameForm.parentNode.removeChild(nicknameForm);
 
-  		// Show the chat dialog box
-  		document.getElementById("chatForm").style.display = "block";
-      // Add it to the DOM
-      addMessageToPage("<em>You have now joined the chat</em>");
-	});
-
+      		// Show the chat dialog box
+      		document.getElementById("chatForm").style.display = "block";
+          // Add it to the DOM
+          addMessageToPage("<em>You have now joined the chat</em>");
+    	});
+  }
   event.preventDefault();
 }
 
