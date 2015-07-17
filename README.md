@@ -1,7 +1,7 @@
-Node-Chat-App
+Node Chat App
 =============
 
-A Node.js chat app using socket.io
+A foray into Node.js and web sockets. This chat app uses the brilliantly useful socket.io
 
 Instructions
 ------------
